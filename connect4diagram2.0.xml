@@ -1,0 +1,68 @@
+<?xml version='1.0'?>
+<diagram>
+	<elements>
+		<entityid id="0" posX="268" posY="93" name="Usuario"></entityid>
+		<attributeid id="1" posX="169" posY="89" type="key" name="email" required="true" unique="false" datatype="varchar" length="50"></attributeid>
+		<attributeid id="2" posX="177" posY="35" type="normal" name="nombre" required="false" unique="false" datatype="varchar" length="50"></attributeid>
+		<attributeid id="5" posX="268" posY="34" type="normal" name="apellido" required="false" unique="false" datatype="varchar" length="50"></attributeid>
+		<entityid id="11" posX="269" posY="289" name="Partida"></entityid>
+		<attributeid id="12" posX="406" posY="254" type="key" name="id" required="true" unique="true" datatype="integer" length="50"></attributeid>
+		<attributeid id="13" posX="115" posY="250" type="normal" name="f_inicio" required="false" unique="false" datatype="date" length="50"></attributeid>
+		<attributeid id="14" posX="119" posY="289" type="normal" name="f_fin" required="false" unique="false" datatype="date" length="50"></attributeid>
+		<attributeid id="15" posX="119" posY="326" type="multivalued" name="grilla" required="false" unique="false" datatype="integer" length="50"></attributeid>
+		<attributeid id="16" posX="392" posY="291" type="normal" name="estado_juego" required="false" unique="false" datatype="serial" length="50"></attributeid>
+		<attributeid id="17" posX="408" posY="331" type="normal" name="resultado" required="false" unique="false" datatype="serial" length="50"></attributeid>
+		<weakentityid id="18" posX="268" posY="462" name="Jugada"></weakentityid>
+		<attributeid id="21" posX="386" posY="462" type="normal" name="fila" required="true" unique="false" datatype="integer" length="50"></attributeid>
+		<attributeid id="22" posX="266" posY="527" type="normal" name="columna" required="true" unique="false" datatype="integer" length="50"></attributeid>
+		<relationshipid id="382" posX="351" posY="182" name="J_2"></relationshipid>
+		<relationshipid id="383" posX="196" posY="183" name="J_1"></relationshipid>
+		<weakrelationshipid id="2451" posX="268" posY="389" name="Tiene"></weakrelationshipid>
+		<attributeid id="2918" posX="109" posY="464" type="key" name="nro_movimiento" required="true" unique="false" datatype="varchar" length="50"></attributeid>
+	</elements>
+	<entity id="0">
+		<attributelist>
+			<attribute id="1"></attribute>
+			<attribute id="2"></attribute>
+			<attribute id="5"></attribute>
+		</attributelist>
+	</entity>
+	<entity id="11">
+		<attributelist>
+			<attribute id="12"></attribute>
+			<attribute id="13"></attribute>
+			<attribute id="14"></attribute>
+			<attribute id="15"></attribute>
+			<attribute id="16"></attribute>
+			<attribute id="17"></attribute>
+		</attributelist>
+	</entity>
+	<weakentity id="18">
+		<attributelist>
+			<attribute id="21"></attribute>
+			<attribute id="22"></attribute>
+			<attribute id="2918"></attribute>
+		</attributelist>
+		<dependencylist>
+			<dependencyref relationshipid="2451"></dependencyref>
+		</dependencylist>
+	</weakentity>
+	<relationship id="382">
+		<rolelist>
+			<role mincard="0" maxcard="N" name="" entityid="11" refintegrity="false"></role>
+			<role mincard="1" maxcard="1" name="" entityid="0" refintegrity="false"></role>
+		</rolelist>
+	</relationship>
+	<relationship id="383">
+		<rolelist>
+			<role mincard="1" maxcard="1" name="" entityid="0" refintegrity="false"></role>
+			<role mincard="0" maxcard="N" name="" entityid="11" refintegrity="false"></role>
+		</rolelist>
+	</relationship>
+	<weakrelationship id="2451">
+		<rolelist>
+			<role mincard="0" maxcard="N" name="" entityid="18" refintegrity="false"></role>
+			<role mincard="1" maxcard="N" name="" entityid="11" refintegrity="false"></role>
+		</rolelist>
+	</weakrelationship>
+</diagram>

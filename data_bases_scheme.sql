@@ -11,6 +11,8 @@ CREATE TABLE dbconnect4.user(
 	PRIMARY KEY ( EMAIL )
 );
 
+-- insert into dbconnect4.user values(CURRENT_USER,'d','d'); -- PREGUNTAR SI VA
+
 CREATE TABLE dbconnect4.userdeleted(
 	EMAIL varchar(56) NOT NULL,
 	D_INIT TIMESTAMP NOT NULL,
@@ -136,7 +138,7 @@ CREATE TRIGGER eliminar_partidas BEFORE DELETE ON dbconnect4.user	--PREGUNTAR SI
 
 CREATE OR REPLACE FUNCTION verificar_col_row() RETURNS TRIGGER AS $verificar_col_row$
 	BEGIN
-		IF EXISTS(SELECT NULL FROM dbconnect4.game g WHERE g.ID=new.GAME_ID AND new.ROW_CELL>0 AND new.ROW_CELL<g.ROW_SIZE AND new.COL_CELL>0 AND new.COL_CELL<g.COL_SIZE) THEN
+		IF EXISTS(SELECT NULL FROM dbconnect4.game g WHERE g.ID=new.GAME_ID AND new.ROW_CELL>0 AND new.ROW_CELL<=g.ROW_SIZE AND new.COL_CELL>0 AND new.COL_CELL<=g.COL_SIZE) THEN
 			RETURN new;
 		ELSE
 			RETURN 'INVALID ROW OR COLUMN';

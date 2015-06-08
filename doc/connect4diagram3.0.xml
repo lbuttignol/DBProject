@@ -1,0 +1,69 @@
+<?xml version='1.0'?>
+<diagram>
+	<elements>
+		<entityid id="0" posX="253" posY="115" name="User"></entityid>
+		<attributeid id="1" posX="151" posY="115" type="key" name="email" required="true" unique="false" datatype="varchar" length="50"></attributeid>
+		<attributeid id="2" posX="138" posY="56" type="normal" name="first_name" required="false" unique="false" datatype="varchar" length="50"></attributeid>
+		<attributeid id="3" posX="247" posY="54" type="normal" name="last_name" required="false" unique="false" datatype="varchar" length="50"></attributeid>
+		<entityid id="4" posX="254" posY="310" name="Game"></entityid>
+		<attributeid id="5" posX="438" posY="270" type="key" name="id" required="true" unique="true" datatype="integer" length="50"></attributeid>
+		<attributeid id="6" posX="92" posY="262" type="normal" name="d_init" required="false" unique="false" datatype="date" length="50"></attributeid>
+		<attributeid id="7" posX="88" posY="304" type="normal" name="d_end" required="false" unique="false" datatype="date" length="50"></attributeid>
+		<attributeid id="8" posX="73" posY="348" type="normal" name="column_size" required="false" unique="false" datatype="integer" length="50"></attributeid>
+		<attributeid id="9" posX="413" posY="313" type="normal" name="game_condition" required="false" unique="false" datatype="serial" length="50"></attributeid>
+		<attributeid id="10" posX="435" posY="356" type="normal" name="result" required="false" unique="false" datatype="serial" length="50"></attributeid>
+		<entityid id="11" posX="256" posY="552" name="Cell"></entityid>
+		<attributeid id="12" posX="384" posY="552" type="key" name="row" required="true" unique="false" datatype="integer" length="50"></attributeid>
+		<attributeid id="13" posX="138" posY="553" type="key" name="column" required="true" unique="false" datatype="integer" length="50"></attributeid>
+		<relationshipid id="14" posX="330" posY="204" name="Player2"></relationshipid>
+		<relationshipid id="15" posX="175" posY="205" name="Player1"></relationshipid>
+		<relationshipid id="16" posX="237" posY="465" name="Movement"></relationshipid>
+		<attributeid id="17" posX="383" posY="466" type="normal" name="movement_number" required="false" unique="false" datatype="integer" length="50"></attributeid>
+		<attributeid id="18" posX="89" posY="394" type="normal" name="row_size" required="false" unique="false" datatype="varchar" length="50"></attributeid>
+	</elements>
+	<entity id="0">
+		<attributelist>
+			<attribute id="1"></attribute>
+			<attribute id="2"></attribute>
+			<attribute id="3"></attribute>
+		</attributelist>
+	</entity>
+	<entity id="4">
+		<attributelist>
+			<attribute id="5"></attribute>
+			<attribute id="6"></attribute>
+			<attribute id="7"></attribute>
+			<attribute id="8"></attribute>
+			<attribute id="9"></attribute>
+			<attribute id="10"></attribute>
+			<attribute id="18"></attribute>
+		</attributelist>
+	</entity>
+	<entity id="11">
+		<attributelist>
+			<attribute id="12"></attribute>
+			<attribute id="13"></attribute>
+		</attributelist>
+	</entity>
+	<relationship id="14">
+		<rolelist>
+			<role mincard="0" maxcard="N" name="" entityid="4" refintegrity="false"></role>
+			<role mincard="1" maxcard="1" name="" entityid="0" refintegrity="false"></role>
+		</rolelist>
+	</relationship>
+	<relationship id="15">
+		<rolelist>
+			<role mincard="1" maxcard="1" name="" entityid="0" refintegrity="false"></role>
+			<role mincard="0" maxcard="N" name="" entityid="4" refintegrity="false"></role>
+		</rolelist>
+	</relationship>
+	<relationship id="16">
+		<attributelist>
+			<attribute id="17"></attribute>
+		</attributelist>
+		<rolelist>
+			<role mincard="0" maxcard="N" name="" entityid="11" refintegrity="false"></role>
+			<role mincard="1" maxcard="N" name="" entityid="4" refintegrity="false"></role>
+		</rolelist>
+	</relationship>
+</diagram>

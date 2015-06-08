@@ -1,0 +1,56 @@
+import java.sql.*;
+
+public class AppProyect{
+	
+	public static void main(String[] args) {
+		
+		try {
+			String driver = "org.postgresql.Driver";
+			String url = "jdbc:postgresql://localhost:5432/postgres";
+			String username = "postgres";
+			String password = "root";
+
+			// Load database driver if not already loaded.
+			Class.forName(driver);
+			// Establish network connection to database.
+			Connection connection =
+			DriverManager.getConnection(url, username, password);
+
+	/*      Statement statement = connection.createStatement();
+	      String query = "SELECT * FROM persona ";
+	      ResultSet resultSet = statement.executeQuery(query);
+	*/
+	      	String query = "SET search_path='dbconnect4'";
+			PreparedStatement statement = connection.prepareStatement(query);
+	//      statement.setString(1, "2");
+			statement.execute();
+
+
+			query = "SELECT * FROM user";
+			statement = connection.prepareStatement(query);
+	//      statement.setString(1, "2");
+			ResultSet resultSet = statement.executeQuery();
+
+	      
+	      // Send query to database and store results.
+
+
+
+	      // Print results.
+	    while(resultSet.next()) {
+	        // Quarter
+
+	        System.out.print(" Email: " + resultSet.getString(1));
+	        System.out.print("; Nombre: " + resultSet.getString(2));
+	        System.out.print("; LastName: " + resultSet.getString(3)) ;
+			System.out.print("\n   ");
+			System.out.print("\n   ");
+	   	}
+		} catch(ClassNotFoundException cnfe) {
+			System.err.println("Error loading driver: " + cnfe);
+		} catch(SQLException sqle) {
+		   	sqle.printStackTrace();
+		    System.err.println("Error connecting: " + sqle);
+		}
+	}	
+}

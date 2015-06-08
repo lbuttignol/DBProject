@@ -32,7 +32,8 @@ insert into dbconnect4.user values
 	('ecerda@exa.unrc.edu.ar','Ernesto','Cerda');
 
 insert into dbconnect4.game(D_INIT,D_END,GAME_CONDITION,RESULT,EMAIL_PLAYER1,EMAIL_PLAYER2,COL_SIZE,ROW_SIZE) values 
-	('1970-01-01 00:00:01','1975-01-01 00:00:01','STAND_BY','TIE','martin@gmail.com','leandro@hotmail.com',8,8), 
+	('1970-01-01 00:00:01','1975-01-01 00:00:01','STAND_BY','TIE','martin@gmail.com','leandro@hotmail.com',8,8),
+	('1974-01-01 00:00:01','1975-05-01 00:00:01','STAND_BY','TIE','martin@gmail.com','leandro@hotmail.com',8,8), 
 	('1976-01-01 00:00:01',NULL,'STAND_BY',NULL,'martin@gmail.com','leandro@hotmail.com',8,8),
 	('2010-12-10 00:00:01',NULL,'STAND_BY',NULL,'franco@exa.unrc.edu.ar','mariano@gmail.com',7,6),
 	('2010-12-10 00:00:01','2010-12-11 00:00:01','FINISHED','PLAYER1','pcastro@exa.unrc.edu.ar','agustina@gmail.com',7,8),

@@ -1,9 +1,36 @@
-﻿DROP SCHEMA IF EXISTS dbconnect4 CASCADE;
+﻿/*	PROYECTO DE BASE DE DATOS CONNECT 4
+ *	Año: 2015
+ * 	Materia: Base de Datos
+ *	Codigo de la materia: 1959
+ *	Profesores :	Fabio Zorzan.
+ *			Guillermo Fraschetti.
+ *			Mariana Frutos.
+ *					
+ *	Integrantes : 	Buttignol, Leandro
+ *			Lòpez,Martìn
+ * 	
+ *	En el presente documento se encuentra el script que permite la creacion de 
+ * 	la base de datos requerida en el proyecto.
+ */
+
+
+
+DROP SCHEMA IF EXISTS dbconnect4 CASCADE;
 CREATE SCHEMA dbconnect4;
 SET search_path='dbconnect4';
 
 DROP TABLE IF EXISTS dbconnect4.user CASCADE ;
 
+-- creamos el dominio que idica el estado del juego.
+DROP DOMAIN IF EXISTS GameStatus;
+CREATE DOMAIN GameStatus AS varchar(20) DEFAULT 'STAND_BY' NOT NULL CHECK (VALUE IN ('STAND_BY','FINISHED'));
+
+-- crea el dominio que indica el ganador del juego, en el caso que no haya uno indicara TIE, 
+-- si el juego no esta finalizado el valor por defecto es "TIE" 
+DROP DOMAIN IF EXISTS Winner;
+CREATE DOMAIN Winner AS varchar(20) DEFAULT NULL CHECK (VALUE IN (NULL,'PLAYER1','PLAYER2','TIE'));
+
+-- creamos la tabla user.
 CREATE TABLE dbconnect4.user(
 	EMAIL varchar(56) NOT NULL,
 	FIRST_NAME varchar(56) DEFAULT NULL,
@@ -11,8 +38,11 @@ CREATE TABLE dbconnect4.user(
 	PRIMARY KEY ( EMAIL )
 );
 
--- insert into dbconnect4.user values(CURRENT_USER,'d','d'); -- PREGUNTAR SI VA
 
+-- creamos la talba userdeleted que contiene la informacion de 
+-- auditoria para controlas los usuarios que fueron eliminados, 
+-- por quien fueron eliminados y la fecha en la cual ocurrio el suceso.
+DROP TABLE IF EXISTS dbconnect4.userdeleted CASCADE;
 CREATE TABLE dbconnect4.userdeleted(
 	EMAIL varchar(56) NOT NULL,
 	D_INIT TIMESTAMP NOT NULL,
@@ -21,6 +51,8 @@ CREATE TABLE dbconnect4.userdeleted(
 	PRIMARY KEY (EMAIL)
 );
 
+-- creamos la tabla cell que contiene todas las celdas que pertenecen a
+-- un tablero con su respectiva posicion, es decir fila y columna.
 DROP TABLE IF EXISTS dbconnect4.cell CASCADE;
 CREATE TABLE dbconnect4.cell(
 	ROW_CELL INT NOT NULL,
@@ -28,29 +60,28 @@ CREATE TABLE dbconnect4.cell(
 	PRIMARY KEY( ROW_CELL , COL_CELL)
 );
 
-INSERT INTO dbconnect4.cell VALUES (6,7),(8,7),(9,7),(10,7),(8,8);
 
-DROP DOMAIN IF EXISTS GameStatus;
-CREATE DOMAIN GameStatus AS varchar(20) DEFAULT 'STAND_BY' NOT NULL CHECK (VALUE IN ('STAND_BY','FINISHED'));
-
-DROP DOMAIN IF EXISTS Winner;
-CREATE DOMAIN Winner AS varchar(20) DEFAULT NULL CHECK (VALUE IN (NULL,'PLAYER1','PLAYER2','TIE'));
-
-
-
+-- declaramos un tipo que utilizamos para controlar el tamaño del talbero.
 DROP TYPE IF EXISTS BoardSize;
 CREATE TYPE BoardSize AS (R INT,C INT);
 
-
+-- funcion que controla que el tamaño del tablero sea un tamaño correcto,
+-- como dice la consigna del proyecto, los tamaños validos son (fila, columna), (6x7),(8x7),(9x7),(10x7),(8x8)
 CREATE OR REPLACE FUNCTION correct_size (R INT DEFAULT 6, C INT DEFAULT 7) RETURNS BoardSize AS $correct_size$
 	DECLARE b BoardSize;
 	BEGIN
 		b.R=correct_size.R;
 		b.C=correct_size.C;
-
-		IF EXISTS (SELECT NULL FROM dbconnect4.cell WHERE ROW_CELL=b.R AND COL_CELL=b.C) THEN
+		IF b.C=7 THEN
+			IF b.R=6 OR b.R=8 OR b.R=9 OR b.R=10 THEN
+				RETURN b;
+			ELSE
+				RAISE EXCEPTION 'INVALID SIZE';
+			END IF;
+		END IF;
+		IF b.C=8 AND b.R=8 THEN
 			RETURN b;
-		ELSE
+		ELSE 
 			RAISE EXCEPTION 'INVALID SIZE';
 		END IF;
 		
@@ -59,52 +90,50 @@ CREATE OR REPLACE FUNCTION correct_size (R INT DEFAULT 6, C INT DEFAULT 7) RETUR
 	LANGUAGE 'plpgsql';
 
 
-
+-- creamos la talba game que contiene la informacion del partido que se va a jugar
 DROP TABLE IF EXISTS dbconnect4.game CASCADE;
 CREATE TABLE dbconnect4.game (
 	ID SERIAL,			
-	D_INIT TIMESTAMP NOT NULL,
+	D_INIT TIMESTAMP DEFAULT NOW(),
 	D_END TIMESTAMP DEFAULT NULL,
 	GAME_CONDITION GameStatus,
 	RESULT Winner,
 	EMAIL_PLAYER1 varchar(56) NOT NULL,
 	EMAIL_PLAYER2 varchar(56) NOT NULL,
-	COL_SIZE INT DEFAULT 7,					--PREGUNTAR SI VA NOT NULL
-	ROW_SIZE INT DEFAULT 6,					--IGUAL
-	CONSTRAINT FK_GAME_1 FOREIGN KEY ( EMAIL_PLAYER1 ) REFERENCES dbconnect4.user ( EMAIL ),
-	CONSTRAINT FK_GAME_2 FOREIGN KEY ( EMAIL_PLAYER2 ) REFERENCES dbconnect4.user ( EMAIL ),
+	COL_SIZE INT DEFAULT 7,					
+	ROW_SIZE INT DEFAULT 6,					
+	CONSTRAINT FK_GAME_1 FOREIGN KEY ( EMAIL_PLAYER1 ) REFERENCES dbconnect4.user ( EMAIL ) ON DELETE CASCADE,
+	CONSTRAINT FK_GAME_2 FOREIGN KEY ( EMAIL_PLAYER2 ) REFERENCES dbconnect4.user ( EMAIL ) ON DELETE CASCADE,
 	PRIMARY KEY (ID)
 );
 
-
+-- creamos la tabla movement que se encarga de guardar todos los movimientos 
+-- de la partida con su respectivo orden, para luego porder recuperar una partida deseada 
 DROP TABLE IF EXISTS dbconnect4.movement CASCADE;
 CREATE TABLE dbconnect4.movement(
 	ROW_CELL INT NOT NULL,
 	COL_CELL INT NOT NULL,
 	GAME_ID INT NOT NULL,
 	MOVEMENT_NUMBER INT NOT NULL,
-	
-	CONSTRAINT FK_MOVEMENT_2 FOREIGN KEY (GAME_ID) REFERENCES dbconnect4.game(ID),
+	CONSTRAINT FK_MOVEMENT_1 FOREIGN KEY (ROW_CELL , COL_CELL) REFERENCES dbconnect4.cell(ROW_CELL,COL_CELL) ON DELETE CASCADE,
+	CONSTRAINT FK_MOVEMENT_2 FOREIGN KEY (GAME_ID) REFERENCES dbconnect4.game(ID) ON DELETE CASCADE,
 	PRIMARY KEY (ROW_CELL, COL_CELL, GAME_ID)
 );
 
-
-
-
+-- funcion que llamamos en el trigger restriccion_new_game, 
+-- controla que el tamaño del tablero de juego sea correcto,
+-- y que no haya solapamiento de fechas en las partidas de los dos jugadores.
 CREATE OR REPLACE FUNCTION restriccion_new_game() RETURNS TRIGGER AS $restriccion_new_game$
 	BEGIN
 		IF EXISTS(SELECT NULL FROM dbconnect4.game WHERE (((EMAIL_PLAYER1=new.EMAIL_PLAYER1 OR EMAIL_PLAYER2=new.EMAIL_PLAYER1)AND(D_END IS NULL))OR ((EMAIL_PLAYER1=new.EMAIL_PLAYER2 OR EMAIL_PLAYER2=new.EMAIL_PLAYER2)AND(D_END IS NULL)))) THEN 
-			RAISE EXCEPTION 'IMPOSSIBLE INSERT NEW GAME';		--debe tirar un error
+			RAISE EXCEPTION 'IMPOSSIBLE INSERT NEW GAME';		
 		ELSE
 			IF  EXISTS(SELECT NULL FROM correct_size(R:=new.ROW_SIZE,C:=new.COL_SIZE)) THEN
 				RETURN new;
 			ELSE
 				RAISE EXCEPTION 'INVALID BOARD SIZE';
 			END IF;
-		END IF;
-
-		
-		
+		END IF;	
 	END;
 	$restriccion_new_game$
 	LANGUAGE 'plpgsql';
@@ -113,32 +142,27 @@ CREATE TRIGGER restriccion_new_game BEFORE INSERT ON dbconnect4.game
 	FOR EACH ROW 
 		EXECUTE PROCEDURE restriccion_new_game();
 
-
-CREATE OR REPLACE FUNCTION eliminar_partidas() RETURNS TRIGGER AS $eliminar_partida$
+-- funcion que crea la informacion de auditoria de un usuario en el momento que es eliminado
+CREATE OR REPLACE FUNCTION auditar_usuario() RETURNS TRIGGER AS $eliminar_partida$
 
 	BEGIN	
-		
-		DELETE FROM dbconnect4.game WHERE EMAIL_PLAYER1=old.EMAIL OR EMAIL_PLAYER2=old.EMAIL;
 		INSERT INTO dbconnect4.userdeleted VALUES (old.EMAIL,now(),CURRENT_USER);
-		RETURN old;
-		
-
+		RETURN old;	
 	END;
 	$eliminar_partida$
 	LANGUAGE 'plpgsql';
 
-
-
-
-CREATE TRIGGER eliminar_partidas BEFORE DELETE ON dbconnect4.user	--PREGUNTAR SI ES BEFORE.
+CREATE TRIGGER auditar_usuario AFTER DELETE ON dbconnect4.user
 	FOR EACH ROW
-		EXECUTE PROCEDURE eliminar_partidas();
+		EXECUTE PROCEDURE auditar_usuario();
 
-
-
+-- Verifica que el movimiento sea un movimiento vàlido
 CREATE OR REPLACE FUNCTION verificar_col_row() RETURNS TRIGGER AS $verificar_col_row$
 	BEGIN
 		IF EXISTS(SELECT NULL FROM dbconnect4.game g WHERE g.ID=new.GAME_ID AND new.ROW_CELL>0 AND new.ROW_CELL<=g.ROW_SIZE AND new.COL_CELL>0 AND new.COL_CELL<=g.COL_SIZE) THEN
+			IF NOT EXISTS (SELECT NULL FROM dbconnect4.cell c WHERE c.ROW_CELL=new.ROW_CELL AND c.COL_CELL=new.COL_CELL ) THEN
+				INSERT INTO dbconnect4.cell values (new.ROW_CELL,new.COL_CELL);
+			END IF;
 			RETURN new;
 		ELSE
 			RAISE EXCEPTION 'INVALID ROW OR COLUMN';
@@ -150,12 +174,3 @@ LANGUAGE 'plpgsql';
 CREATE TRIGGER verificar_col_row BEFORE INSERT ON dbconnect4.movement
 	FOR EACH ROW
 		EXECUTE PROCEDURE verificar_col_row();
-
-
-
-/*	Los diferentes códigos deben ser generados automáticamente.
-	No puede haber dos partidas de un mismo jugador que tengan solapamiento de fechas.
-	Cuando se elimina un jugador debe eliminar las partidas que jugó. El resto de las especificaciones ON DELETE Y ON UPDATE en la definición de claves foráneas deben ser definidas por el grupo.
-	La implementación de la base de datos deberá permitir generar información de auditoría automáticamente. Se deberá agregar información en una tabla sobre los eliminación de usuarios, está información deberá contener el usuario eliminado, fecha de eliminación y el usuario de la base de datos que la realizó.
-	Se deberá controlar que según el tipo de tablero usado, los valores X,Y de sus celdas deben estar en el rango correcto.
-*/

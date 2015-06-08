@@ -171,7 +171,6 @@ CREATE OR REPLACE FUNCTION verificar_col_row() RETURNS TRIGGER AS $verificar_col
 		ELSE
 			RAISE EXCEPTION 'INVALID ROW OR COLUMN';
 		END IF;
-
 	END;
 $verificar_col_row$
 LANGUAGE 'plpgsql';
